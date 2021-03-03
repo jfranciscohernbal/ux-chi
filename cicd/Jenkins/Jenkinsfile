@@ -217,9 +217,6 @@ pipeline {
                 // registryCredentialsId DOCKER_CREDENTIALS
               }
             }
-            when {
-              beforeAgent true
-            }
             steps {
               script {
                 dir('src/custom-elements') {
@@ -241,9 +238,6 @@ pipeline {
                 // registryUrl DOCKER_REGISTRY
                 // registryCredentialsId DOCKER_CREDENTIALS
               }
-            }
-            when {
-              beforeAgent true
             }
             steps {
               script {
@@ -268,9 +262,6 @@ pipeline {
             // registryUrl DOCKER_REGISTRY
             // registryCredentialsId DOCKER_CREDENTIALS
           }
-        }
-        when {
-          beforeAgent true
         }
         steps {
           script {
