@@ -223,6 +223,7 @@ pipeline {
             }
             steps {
               script {
+                sh "sleep 30s"
                 jslYarnWrapper('install')
                 jslNpmWrapper('run build')
                 stash name: "DIST-CHI", includes: "dist/**"
@@ -303,6 +304,7 @@ pipeline {
             }
             steps {
               script {
+                sh "sleep 30s"
                 jslYarnWrapper('install')
                 jslNpmWrapper('run build')
                 stash name: "DIST-CHI", includes: "dist/**"
