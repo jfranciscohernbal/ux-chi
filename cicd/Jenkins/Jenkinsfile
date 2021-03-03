@@ -323,7 +323,6 @@ pipeline {
                   cp -a config/backstop_data/bitmaps_reference/responsive reports/html_report/responsive/bitmaps_reference
                 """, label: "Copying config files"
                 jslNpmWrapper('run test')
-                echo "TESTS MUST BE FIXED, SINCE THEY FAIL"
               }
             }
           }
@@ -368,7 +367,6 @@ pipeline {
                   ./node_modules/.bin/cypress run
                 """, label: "Running NPX before adding JSL file, TEST."
                 jslNpxWrapper('gulp serve:stop')
-                echo "This will run Cypress Local tests, when tests are fixed"
               }
             }
           }
