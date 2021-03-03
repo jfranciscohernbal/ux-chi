@@ -204,33 +204,8 @@ pipeline {
           }
         }
       }
-      stage('PR Build') {
+      stage('CE & Vue Build') {
         parallel {
-          stage ('Building Chi') {
-            agent {
-              dockerfile {
-                filename 'Dockerfile'
-                dir 'cicd/docker/sonar-scanner'
-                label 'Docker-enabled'
-                args '--shm-size=2gb'
-                // registryUrl DOCKER_REGISTRY
-                // registryCredentialsId DOCKER_CREDENTIALS
-              }
-            }
-            when {
-              beforeAgent true
-              not { branch 'master' }
-            }
-            steps {
-              script {
-                sh "sleep 30s"
-                jslYarnWrapper('install')
-                jslNpmWrapper('run build')
-                stash name: "DIST-CHI", includes: "dist/**"
-                stash name: "NODEMODULES-CHI", includes: "node_modules/**"
-              }
-            }
-          }
           stage ('Building Custom elements') {
             agent {
               dockerfile {
@@ -244,7 +219,6 @@ pipeline {
             }
             when {
               beforeAgent true
-              not { branch 'master' }
             }
             steps {
               script {
@@ -270,7 +244,6 @@ pipeline {
             }
             when {
               beforeAgent true
-              not { branch 'master' }
             }
             steps {
               script {
@@ -285,84 +258,30 @@ pipeline {
           }
         }
       }
-      stage('Build for Production') {
-        parallel {
-          stage ('Building Chi') {
-            agent {
-              dockerfile {
-                filename 'Dockerfile'
-                dir 'cicd/docker/sonar-scanner'
-                label 'Docker-enabled'
-                args '--shm-size=2gb'
-                // registryUrl DOCKER_REGISTRY
-                // registryCredentialsId DOCKER_CREDENTIALS
-              }
-            }
-            when {
-              beforeAgent true
-              branch 'master'
-            }
-            steps {
-              script {
-                sh "sleep 30s"
-                jslYarnWrapper('install')
-                jslNpmWrapper('run build')
-                stash name: "DIST-CHI", includes: "dist/**"
-                stash name: "NODEMODULES-CHI", includes: "node_modules/**"
-              }
-            }
+      stage ('Building Chi') {
+        agent {
+          dockerfile {
+            filename 'Dockerfile'
+            dir 'cicd/docker/sonar-scanner'
+            label 'Docker-enabled'
+            args '--shm-size=2gb'
+            // registryUrl DOCKER_REGISTRY
+            // registryCredentialsId DOCKER_CREDENTIALS
           }
-          stage ('Building Custom elements') {
-            agent {
-              dockerfile {
-                filename 'Dockerfile'
-                dir 'cicd/docker/sonar-scanner'
-                label 'Docker-enabled'
-                args '--shm-size=2gb'
-                // registryUrl DOCKER_REGISTRY
-                // registryCredentialsId DOCKER_CREDENTIALS
-              }
+        }
+        when {
+          beforeAgent true
+        }
+        steps {
+          script {
+            dir ('src/custom-elements') {
+              unstash name: "DIST-CHI-CE"
             }
-            when {
-              beforeAgent true
-              branch 'master'
-            }
-            steps {
-              script {
-                dir('src/custom-elements') {
-                  jslYarnWrapper('install')
-                  jslNpmWrapper('run build')
-                  stash name: "DIST-CHI-CE", includes: "dist/**"
-                  stash name: "NODEMODULES-CHI-CE", includes: "node_modules/**"
-                }
-              }
-            }
-          }
-          stage ('Building Chi-vue') {
-            agent {
-              dockerfile {
-                filename 'Dockerfile'
-                dir 'cicd/docker/sonar-scanner'
-                label 'Docker-enabled'
-                args '--shm-size=2gb'
-                // registryUrl DOCKER_REGISTRY
-                // registryCredentialsId DOCKER_CREDENTIALS
-              }
-            }
-            when {
-              beforeAgent true
-              branch 'master'
-            }
-            steps {
-              script {
-                dir('src/chi-vue') {
-                  jslYarnWrapper('install')
-                  jslNpmWrapper('run build:component')
-                  stash name: "DIST-CHI-VUE", includes: "dist/**"
-                  stash name: "NODEMODULES-CHI-VUE", includes: "node_modules/**"
-                }
-              }
-            }
+            sh "sleep 10s"
+            jslYarnWrapper('install')
+            jslNpmWrapper('run build')
+            stash name: "DIST-CHI", includes: "dist/**"
+            stash name: "NODEMODULES-CHI", includes: "node_modules/**"
           }
         }
       }
