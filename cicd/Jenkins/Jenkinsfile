@@ -572,7 +572,7 @@ pipeline {
       }
       stage ('Publish to S3') {
         parallel {
-          stage ('Publish Dev/Beta build') {
+          stage ('Publish Dev build') {
             when {
               beforeAgent true
               not { branch 'master' }
@@ -628,9 +628,9 @@ PolicyDocument
 
                   cat ${WORKSPACE}/CHANGELOG.md
 
-                  if [ -e "${WORKSPACE}/assets_repo" ];
+                  if [ -e "${WORKSPACE}/ux-chi-AssetsServer" ];
                   then
-                    rm -rf ${WORKSPACE}/assets_repo
+                    rm -rf ${WORKSPACE}/ux-chi-AssetsServer
                   fi
                 """, label: "Cleaning before pushing to AssetsServer"
                 jslGitHubCloneRepo('ux-chi-AssetsServer')
@@ -638,6 +638,19 @@ PolicyDocument
                   ls -lah
                   VERSION=\$(cat package.json | grep '"version":' | cut -f4 -d '"')
                   echo \${VERSION}
+                  cat << 'PRDesc' > ux-chi-AssetsServer/prepared-message.md
+This PR is for CHI \${VERSION}
+PRDesc
+                  mkdir -p ${WORKSPACE}/ux-chi-AssetsServer/chi/latest
+                  cp -R ${WORKSPACE}/dist/* ${WORKSPACE}/ux-chi-AssetsServer/chi/latest/
+                  mv ${WORKSPACE}/dist ${WORKSPACE}/ux-chi-AssetsServer/chi/\$VERSION
+                  cd ${WORKSPACE}/ux-chi-AssetsServer
+                  git checkout -b "CHI_\$VERSION"
+                  git add ${WORKSPACE}/ux-chi-AssetsServer/chi/\$VERSION
+                  git add ${WORKSPACE}/ux-chi-AssetsServer/chi/latest
+                  git commit -m "CHI_\$VERSION"
+                  git push origin CHI_\$VERSION
+                  hub pull-request -F prepared-message.md
                 """
                 echo "This will publish Prod build to S3 & CDN"
               }
