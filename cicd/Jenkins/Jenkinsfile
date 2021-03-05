@@ -10,6 +10,7 @@
 */
 
 library(
+
       identifier: 'jsl-jenkins-shared-library@master',
       retriever: modernSCM(
         [
@@ -63,6 +64,7 @@ pipeline {
       // Add 
       PROJECT_NAME = 'ux-chi'
       DOCKER_REPO ='ux-chi/chi'
+
       PROJECT_MAL = "chi"
 
       BRANCH_NAME = GIT_BRANCH.split('/')[-1].trim().toLowerCase()
@@ -204,6 +206,7 @@ pipeline {
           }
         }
       }
+
       stage('CE & Vue Build') {
         parallel {
           stage ('Building Custom elements') {
