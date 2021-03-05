@@ -43,16 +43,11 @@ pipeline {
       
       GITHUB_TOKEN_CREDENTIALS = 'SCMAUTO_GITHUB'
       GITHUB_SSH_CREDENTIALS = 'SCMAUTO_SSH_DEVOPS_PIPELINE'
-      DOCKER_CREDENTIALS = ''
-      KUBE_CREDENTIALS = ''
-      KUBE_CREDENTIALS_TEST = ''
-      KUBE_CREDENTIALS_PROD = ''
       AMAZON_CREDENTIALS = 'awsCredentialsPR'
       AMAZON_CREDENTIALS_PR = 'awsCredentials'
       SONARQUBE_CREDENTIALS = ''
       GCP_CREDENTIALS = ''
       JIRA_CREDENTIALS = ''
-      MORPHEUS_CREDENTIALS = ''
       MSTEAMS_CREDENTIALS = ''
       QUALITY_GATE_CREDENTIALS = ''
       //Deployment control credentialsId
@@ -68,11 +63,6 @@ pipeline {
       BRANCH_NAME = GIT_BRANCH.split('/')[-1].trim().toLowerCase()
       COMMIT_ID = GIT_COMMIT.substring(0,7).trim().toLowerCase()
       PULL_REQUEST="pr-${env.CHANGE_ID}"
-      IMAGE_NAME = "${env.PROJECT_NAME}"
-      IMAGE_TAG =  "${env.PULL_REQUEST}"
-      KUBE_DOCKER_SECRET_NAME = "${env.PROJECT_NAME}-${env.PULL_REQUEST}"
-      KUBE_DOCKER_SECRET_NAME_TEST = "${env.PROJECT_NAME}-${env.BRANCH_NAME}"
-      KUBE_DOCKER_SECRET_NAME_PROD = "${env.PROJECT_NAME}-${env.BRANCH_NAME}"
     }
     
 
@@ -637,6 +627,22 @@ PolicyDocument
             }
             steps {
               script {
+                sh script:"""
+                  sed -i 's#/getting-started#getting-started#g' dist/index.html
+
+                  cat ${WORKSPACE}/CHANGELOG.md
+
+                  if [ -e "${WORKSPACE}/assets_repo" ];
+                  then
+                    rm -rf ${WORKSPACE}/assets_repo
+                  fi
+                """, label: "Cleaning before pushing to AssetsServer"
+                jslGitHubCloneRepo('ux-chi-AssetsServer')
+                sh script:"""
+                  ls -lah
+                  VERSION=\$(cat package.json | grep '"version":' | cut -f4 -d '"')
+                  echo \${VERSION}
+                """
                 echo "This will publish Prod build to S3 & CDN"
               }
             }
