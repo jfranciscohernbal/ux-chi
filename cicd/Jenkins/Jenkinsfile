@@ -531,26 +531,26 @@ pipeline {
             }
             steps {
               script {
-                def packageJson = readJSON file: 'package.json'
-                def tagName = "${packageJson.version}"
-                echo "Release tag is ${tagName}"
-                def releaseId = jslGitHubReleaseGetId(tagName)
-                sh "touch do_release"
-                if (releaseId == null) {
-                  def committishName = GIT_BRANCH
-                  if (GIT_BRANCH.startsWith('origin/')) {
-                    committishName = GIT_BRANCH.split("/")[1]
-                  }
-                  releaseId = jslGitHubReleaseCreate(tagName, committishName)
-                  if (releaseId == null) {
-                    throw new Exception("There was an error publishing the release")
-                  }
-                  sh "echo -n yes > do_release"
-                } else {
-                  echo "A release already exists for ${tagName}"
-                  sh "echo -n no > do_release"
-                }
-                stash name: "DO_RELEASE", includes: "do_release"
+                // def packageJson = readJSON file: 'package.json'
+                // def tagName = "${packageJson.version}"
+                // echo "Release tag is ${tagName}"
+                // def releaseId = jslGitHubReleaseGetId(tagName)
+                // sh "touch do_release"
+                // if (releaseId == null) {
+                //   def committishName = GIT_BRANCH
+                //   if (GIT_BRANCH.startsWith('origin/')) {
+                //     committishName = GIT_BRANCH.split("/")[1]
+                //   }
+                //   releaseId = jslGitHubReleaseCreate(tagName, committishName)
+                //   if (releaseId == null) {
+                //     throw new Exception("There was an error publishing the release")
+                //   }
+                //   sh "echo -n yes > do_release"
+                // } else {
+                //   echo "A release already exists for ${tagName}"
+                //   sh "echo -n no > do_release"
+                // }
+                // stash name: "DO_RELEASE", includes: "do_release"
                 echo "Active development, will activate as soon as this works"
               }
             }
@@ -573,13 +573,14 @@ pipeline {
         }
         steps {
           script {
-            dir('src/chi-vue') {
-              unstash name: "DIST-CHI-VUE"
-              unstash name: "NODEMODULES-CHI-VUE"
-              jslNpmWrapper('pack')
-              jslNpmWrapper('login --scope=@centurylinkcloud --registry=https://npm.pkg.github.com')
-              jslNpmWrapper('publish')
-            }
+            // dir('src/chi-vue') {
+            //   unstash name: "DIST-CHI-VUE"
+            //   unstash name: "NODEMODULES-CHI-VUE"
+            //   jslNpmWrapper('pack')
+            //   jslNpmWrapper('login --scope=@centurylinkcloud --registry=https://npm.pkg.github.com')
+            //   jslNpmWrapper('publish')
+            // }
+            echo "Active development, will activate as soon as this works"
           }
         }
       }
@@ -624,6 +625,15 @@ PolicyDocument
             when {
               beforeAgent true
               branch 'master'
+            }
+            agent {
+              dockerfile {
+                filename 'Dockerfile'
+                dir 'cicd/docker/sonar-scanner'
+                label 'Docker-enabled'
+                // registryUrl DOCKER_REGISTRY
+                // registryCredentialsId DOCKER_LOGIN_CREDENTIALS
+              }
             }
             steps {
               script {
