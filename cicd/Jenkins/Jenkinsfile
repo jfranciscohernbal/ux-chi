@@ -57,7 +57,6 @@ pipeline {
       // Custom project variables
       // Add 
       PROJECT_NAME = 'ux-chi'
-      DOCKER_REPO ='ux-chi/chi'
       PROJECT_MAL = "chi"
 
       BRANCH_NAME = GIT_BRANCH.split('/')[-1].trim().toLowerCase()
@@ -106,15 +105,12 @@ pipeline {
           script {
             sh script: """
                 echo "PROJECT_NAME: ${PROJECT_NAME}"
-                echo "DOCKER_REPO: ${DOCKER_REPO}"
                 echo "GIT_BRANCH: ${GIT_BRANCH}"
                 echo "GIT_COMMIT: ${GIT_COMMIT}"
                 echo "BRANCH_NAME: ${BRANCH_NAME}"
                 echo "COMMIT_ID: ${COMMIT_ID}"
                 echo "PULL_REQUEST: ${PULL_REQUEST}"
-                echo "CHANGE_ID: ${env.CHANGE_ID}"
-                echo "IMAGE_NAME: ${IMAGE_NAME}"
-                echo "IMAGE_TAG: ${IMAGE_TAG}"                        
+                echo "CHANGE_ID: ${env.CHANGE_ID}"                       
             """, label: "Details summary"
             if ( BRANCH_NAME != "master" && BRANCH_NAME != "pr-*" ) {
               currentBuild.description = "<a href='https://github.com/CenturyLinkCloud/ux-chi/tree/${BRANCH_NAME}'>${BRANCH_NAME}</a> - <a href='https://${GIT_COMMIT}-chi-pr.enterprise.ctl.io'> WEB </a> : ${BRANCH_NAME}";
